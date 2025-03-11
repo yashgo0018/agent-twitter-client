@@ -6,6 +6,9 @@ export default [
     input: 'src/_module.ts',
     plugins: [
       esbuild({
+        tsconfig: 'tsconfig.json',
+        sourceMap: true,
+        target: 'es2020',
         define: {
           PLATFORM_NODE: 'false',
           PLATFORM_NODE_JEST: 'false',
@@ -29,6 +32,9 @@ export default [
     input: 'src/_module.ts',
     plugins: [
       esbuild({
+        tsconfig: 'tsconfig.json',
+        sourceMap: true,
+        target: 'es2020',
         define: {
           PLATFORM_NODE: 'true',
           PLATFORM_NODE_JEST: 'false',
