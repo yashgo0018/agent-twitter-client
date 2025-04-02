@@ -336,7 +336,7 @@ export async function createCreateTweetRequestV2(
       ],
     };
   }
-  return await getTweetV2(tweetResponse.data.id, auth, optionsConfig);
+  return await getTweet(tweetResponse.data.id, auth);
 }
 
 export function parseTweetV2ToV1(
