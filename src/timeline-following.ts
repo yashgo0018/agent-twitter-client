@@ -1,7 +1,8 @@
 import { requestApi } from './api';
-import { TwitterAuth } from './auth';
+import type { TwitterAuth } from './auth';
 import { ApiError } from './errors';
-import { TimelineInstruction } from './timeline-v2';
+import type { TimelineResultRaw } from './timeline-v1';
+import type { TimelineInstruction } from './timeline-v2';
 
 export interface HomeLatestTimelineResponse {
   data?: {
@@ -17,7 +18,7 @@ export async function fetchFollowingTimeline(
   count: number,
   seenTweetIds: string[],
   auth: TwitterAuth,
-): Promise<any[]> {
+): Promise<TimelineResultRaw[]> {
   const variables = {
     count,
     includePromotedContent: true,
@@ -75,18 +76,13 @@ export async function fetchFollowingTimeline(
     return [];
   }
 
-  const entries: any[] = [];
+  const entries = home
+    .filter((instruction) => instruction.type === 'TimelineAddEntries')
+    .flatMap(({ entries }) => entries || []);
 
-  for (const instruction of home) {
-    if (instruction.type === 'TimelineAddEntries') {
-      for (const entry of instruction.entries ?? []) {
-        entries.push(entry);
-      }
-    }
-  }
   // get the itemContnent from each entry
   const tweets = entries
-    .map((entry) => entry.content.itemContent?.tweet_results?.result)
+    .map((entry) => entry.content?.itemContent?.tweet_results?.result)
     .filter((tweet) => tweet !== undefined);
 
   return tweets;

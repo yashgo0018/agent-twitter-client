@@ -1,17 +1,21 @@
-import { Cookie } from 'tough-cookie';
+import type { Cookie } from 'tough-cookie';
 import {
+  type FetchTransformOptions,
+  type RequestApiResult,
   bearerToken,
-  FetchTransformOptions,
   requestApi,
-  RequestApiResult,
 } from './api';
-import { TwitterAuth, TwitterAuthOptions, TwitterGuestAuth } from './auth';
+import {
+  type TwitterAuth,
+  type TwitterAuthOptions,
+  TwitterGuestAuth,
+} from './auth';
 import { TwitterUserAuth } from './auth-user';
 import {
+  type Profile,
   getProfile,
   getUserIdByScreenName,
   getScreenNameByUserId,
-  Profile,
 } from './profile';
 import {
   fetchQuotedTweetsPage,
@@ -19,7 +23,6 @@ import {
   fetchSearchTweets,
   SearchMode,
   searchProfiles,
-  searchQuotedTweets,
   searchTweets,
 } from './search';
 import {
@@ -29,23 +32,20 @@ import {
   getFollowers,
   followUser,
 } from './relationships';
-import { QueryProfilesResponse, QueryTweetsResponse } from './timeline-v1';
+import type { QueryProfilesResponse, QueryTweetsResponse } from './timeline-v1';
 import { getTrends } from './trends';
 import {
-  Tweet,
   getTweetAnonymous,
   getTweets,
   getLatestTweet,
   getTweetWhere,
   getTweetsWhere,
   getTweetsByUserId,
-  TweetQuery,
   getTweet,
   fetchListTweets,
   getTweetsAndRepliesByUserId,
   getTweetsAndReplies,
   createCreateTweetRequest,
-  PollData,
   createCreateTweetRequestV2,
   getTweetV2,
   getTweetsV2,
@@ -57,16 +57,16 @@ import {
   createCreateLongTweetRequest,
   getArticle,
   getAllRetweeters,
-  Retweeter,
 } from './tweets';
+import type { Tweet, TweetQuery, PollData, Retweeter } from './tweets';
 import {
+  type TimelineArticle,
+  type TimelineV2,
   parseTimelineTweetsV2,
-  TimelineArticle,
-  TimelineV2,
 } from './timeline-v2';
 import { fetchHomeTimeline } from './timeline-home';
 import { fetchFollowingTimeline } from './timeline-following';
-import {
+import type {
   TTweetv2Expansion,
   TTweetv2MediaField,
   TTweetv2PlaceField,
@@ -75,10 +75,10 @@ import {
   TTweetv2UserField,
 } from 'twitter-api-v2';
 import {
-  DirectMessagesResponse,
+  type DirectMessagesResponse,
+  type SendDirectMessageResponse,
   getDirectMessageConversations,
   sendDirectMessage,
-  SendDirectMessageResponse,
 } from './messages';
 import {
   fetchAudioSpaceById,
@@ -88,7 +88,7 @@ import {
   fetchLiveVideoStreamStatus,
   fetchLoginTwitterToken,
 } from './spaces';
-import {
+import type {
   AudioSpace,
   Community,
   LiveVideoStreamStatus,
@@ -96,10 +96,10 @@ import {
   Subtopic,
 } from './types/spaces';
 import {
+  type GrokChatOptions,
+  type GrokChatResponse,
   createGrokConversation,
   grokChat,
-  GrokChatOptions,
-  GrokChatResponse,
 } from './grok';
 
 const twUrl = 'https://twitter.com';
@@ -318,10 +318,7 @@ export class Scraper {
    * @param seenTweetIds An array of tweet IDs that have already been seen.
    * @returns A promise that resolves to the home timeline response.
    */
-  public async fetchHomeTimeline(
-    count: number,
-    seenTweetIds: string[],
-  ): Promise<any[]> {
+  public async fetchHomeTimeline(count: number, seenTweetIds: string[]) {
     return await fetchHomeTimeline(count, seenTweetIds, this.auth);
   }
 
@@ -331,10 +328,7 @@ export class Scraper {
    * @param seenTweetIds An array of tweet IDs that have already been seen.
    * @returns A promise that resolves to the home timeline response.
    */
-  public async fetchFollowingTimeline(
-    count: number,
-    seenTweetIds: string[],
-  ): Promise<any[]> {
+  public async fetchFollowingTimeline(count: number, seenTweetIds: string[]) {
     return await fetchFollowingTimeline(count, seenTweetIds, this.auth);
   }
 
@@ -343,13 +337,11 @@ export class Scraper {
     maxTweets = 200,
     cursor?: string,
   ): Promise<{ tweets: Tweet[]; next?: string }> {
-    if (maxTweets > 200) {
-      maxTweets = 200;
-    }
+    const tweetCount = Math.min(maxTweets, 200);
 
     const variables: Record<string, any> = {
       userId,
-      count: maxTweets,
+      count: tweetCount,
       includePromotedContent: true,
       withQuickPromoteEligibilityTweetFields: true,
       withVoice: true,
@@ -357,7 +349,7 @@ export class Scraper {
     };
 
     if (cursor) {
-      variables['cursor'] = cursor;
+      variables.cursor = cursor;
     }
 
     const features = {
@@ -646,9 +638,9 @@ export class Scraper {
   public getTweet(id: string): Promise<Tweet | null> {
     if (this.auth instanceof TwitterUserAuth) {
       return getTweet(id, this.auth);
-    } else {
-      return getTweetAnonymous(id, this.auth);
     }
+
+    return getTweetAnonymous(id, this.auth);
   }
 
   /**
